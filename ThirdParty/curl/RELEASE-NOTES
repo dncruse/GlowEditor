@@ -1,0 +1,48 @@
+curl and libcurl 7.85.1
+
+ Public curl releases:         211
+ Command line options:         248
+ curl_easy_setopt() options:   299
+ Public functions in libcurl:  88
+ Contributors:                 2692
+
+This release includes the following changes:
+
+ o
+
+This release includes the following bugfixes:
+
+ o cmake: fix original MinGW builds [177]
+ o configure: fail if '--without-ssl' + explicit parameter for an ssl lib [164]
+ o CURLOPT_WILDCARDMATCH.3: Fix backslash escaping under single quotes [172]
+ o docs: remove mentions of deprecated '--without-openssl' parameter [170]
+ o manpages: Fix spelling of "allows to" -> "allows one to" [171]
+ o misc: spelling fixes [174]
+ o tests/certs/scripts: insert standard curl source headers [169]
+ o tool_operate: prevent over-queuing in parallel mode [176]
+ o tool_operate: reduce errorbuffer allocs [173]
+ o tool_progress: remove 'Qd' from the parallel progress bar [175]
+
+This release includes the following known bugs:
+
+ o see docs/KNOWN_BUGS (https://curl.se/docs/knownbugs.html)
+
+This release would not have looked like this without help, code, reports and
+advice from friends like these:
+
+  ajak in #curl, Daniel Stenberg, James Fuller, justchen1369 on github,
+  Samuel Henrique, Viktor Szakats
+  (6 contributors)
+
+References to bug reports and discussions on issues:
+
+ [164] = https://curl.se/bug/?i=9414
+ [169] = https://curl.se/bug/?i=9417
+ [170] = https://curl.se/bug/?i=9415
+ [171] = https://curl.se/bug/?i=9419
+ [172] = https://curl.se/bug/?i=9418
+ [173] = https://curl.se/bug/?i=9394
+ [174] = https://curl.se/bug/?i=9403
+ [175] = https://curl.se/bug/?i=9389
+ [176] = https://curl.se/bug/?i=8933
+ [177] = https://curl.se/bug/?i=9214
