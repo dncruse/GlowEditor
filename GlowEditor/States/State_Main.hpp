@@ -68,20 +68,26 @@ namespace Glow
       /**************************************************************/
       static void Exit();
 
-      static void MakeEditorWidget();
+      static void IdentifyPanels();
 
-      static void SetLightColor();
+      static void GetAllPanelData();
+      
+      static void SetColor();
 
-      static void SetLightToDefault();
+      static void SetEffect(const std::string& effect);
 
-      static void GetAllShapeData();
+      static void SetOnOff(bool on);
+
+      static void SetOrientation();
 
     private:
-      static glm::vec3 color_;          //!< the current color of the lights
-      static rj::Document lightConfig_; //!< light configuration JSON
-      static long long timer_;          //!< update timer
-      static std::string authToken_;    //!< auth token
-      static std::string host_;         //!< host IP address
+      static rj::Document lightConfig_;         //!< light configuration JSON
+      static long long timer_;                  //!< update timer
+      static glm::vec3 color_;                  //!< the current color of the lights
+      static std::vector<std::string> effects_; //!< light effects
+      static int orientation_;                  //!< global panel orientation angle
+      static std::string authToken_;            //!< auth token
+      static std::string host_;                 //!< host IP address
   };
 }
 
