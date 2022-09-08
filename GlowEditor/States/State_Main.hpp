@@ -74,6 +74,14 @@ namespace Glow
       
       static void SetColor();
 
+      static void SetHue();
+
+      static void SetSaturation();
+
+      static void SetBrightness();
+
+      static void SetColorTemperature();
+
       static void SetEffect(const std::string& effect);
 
       static void SetOnOff(bool on);
@@ -83,7 +91,8 @@ namespace Glow
     private:
       static rj::Document lightConfig_;         //!< light configuration JSON
       static long long timer_;                  //!< update timer
-      static glm::vec3 color_;                  //!< the current color of the lights
+      static glm::vec3 color_;                  //!< the current color of the lights in HSV
+      static int colorTemperature_;             //!< color temperature (1200 to 6500)
       static std::vector<std::string> effects_; //!< light effects
       static int orientation_;                  //!< global panel orientation angle
       static std::string authToken_;            //!< auth token

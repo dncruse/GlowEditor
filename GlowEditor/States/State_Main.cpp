@@ -29,11 +29,12 @@ namespace Glow
 {
   rj::Document State_Main::lightConfig_ = rj::Document();
   long long State_Main::timer_ = 0;
-  glm::vec3 State_Main::color_(0.8f, 0.2f, 0.2f);
+  glm::vec3 State_Main::color_(0.5f, 0.5f, 0.5f);
+  int State_Main::colorTemperature_ = 3000;
   std::vector<std::string> State_Main::effects_ = std::vector<std::string>();
   int State_Main::orientation_ = 0;
   std::string State_Main::authToken_ = std::string();
-  std::string State_Main::host_ = std::string("http://");
+  std::string State_Main::host_ = std::string("http://xxx.xxx.xxx.xxx:16021");
 
   State_Main::State_Main() : State(Enter, Update, Exit)
   {
@@ -105,100 +106,132 @@ namespace Glow
 
   void State_Main::Update()
   {
-    if (timer_ > 50)
-    {
-      timer_ = 0;
-      GetAllPanelData();
-    }
-    
     const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_Once);
     ImGui::SetNextWindowSize(ImVec2(430, 720), ImGuiCond_Once);
 
     ImGui::Begin("Editor", 0, (1 << 1) | (1 << 2) | (1 << 5) | (1 << 0));
 
-    ImGui::Text("Host:");
-    ImGui::PushID("hostInput");
-    ImGui::InputText("", &host_);
-    ImGui::PopID();
-
-    ImGui::Text("");
-
-    if (ImGui::CollapsingHeader("Authorization"))
+    if (ImGui::BeginTabBar("Tab bar"))
     {
-      ImGui::Text("");
-
-      ImGui::Text("Token");
-      ImGui::PushID("authInput");
-      ImGui::InputText("", &authToken_);
-      ImGui::PopID();
-
-      ImGui::Text("");
-      ImGui::Separator();
-    }
-
-    if (ImGui::CollapsingHeader("State"))
-    {
-      ImGui::Text("");
-      ImGui::Text("Light switch");
-      if (ImGui::Button("On"))
+      if (ImGui::BeginTabItem("Authorization"))
       {
-        SetOnOff(true);
-      }
-      ImGui::SameLine();
-      if (ImGui::Button("Off"))
-      {
-        SetOnOff(false);
-      }
-      ImGui::Text("");
-      
-      ImGui::Text("Orientation");
-      ImGui::PushID("orientationInput");
-      if (ImGui::SliderInt("", &orientation_, 0, 360))
-      {
-        SetOrientation();
-      }
-      ImGui::PopID();
-      ImGui::Text("");
+        ImGui::Text("");
+        
+        ImGui::Text("Host:");
+        ImGui::PushID("hostInput");
+        ImGui::InputText("", &host_);
+        ImGui::PopID();
+        
+        ImGui::Text("");
 
-      ImGui::Text("Color");
-      ImGui::PushID("colorInput");
-      if (ImGui::ColorPicker3("", reinterpret_cast<float*>(&color_)))
-      {
-        SetColor();
-      }
-      ImGui::PopID();
+        ImGui::Text("Token");
+        ImGui::PushID("authInput");
+        ImGui::InputText("", &authToken_);
+        ImGui::PopID();
 
-      ImGui::Text("");
-      ImGui::Separator();
-    }
+        ImGui::Text("");
 
-    if (ImGui::CollapsingHeader("Effects"))
-    {
-      ImGui::Text("");
-      
-      if (effects_.empty())
-      {
-        ImGui::Text("(No effects on controller)");
-      }
-      else {
-        for (auto it = effects_.begin(); it != effects_.end(); ++it)
+        if (ImGui::Button("Identify panels"))
         {
-          if (ImGui::Button((*it).c_str()))
+          IdentifyPanels();
+        }
+
+        ImGui::EndTabItem();
+      }
+
+      if (ImGui::BeginTabItem("State"))
+      {
+        ImGui::Text("");
+
+        ImGui::Text("Light switch");
+        if (ImGui::Button("On"))
+        {
+          SetOnOff(true);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Off"))
+        {
+          SetOnOff(false);
+        }
+
+        ImGui::Text("");
+
+        ImGui::Text("Orientation");
+        ImGui::PushID("orientationInput");
+        if (ImGui::SliderInt("", &orientation_, 0, 360))
+        {
+          SetOrientation();
+        }
+        ImGui::PopID();
+
+        ImGui::Text("");
+
+        ImGui::Text("Color");
+        ImGui::PushID("colorInput");
+        if (ImGui::ColorPicker3("", reinterpret_cast<float*>(&color_), 1 << 28 | 1 << 5))
+        {
+          SetColor();
+        }
+        ImGui::PopID();
+
+        ImGui::Text("Hue");
+        ImGui::PushID("hueInput");
+        if (ImGui::SliderFloat("", &(color_.x), 0, 1.0f))
+        {
+          SetHue();
+        }
+        ImGui::PopID();
+
+        ImGui::Text("Saturation");
+        ImGui::PushID("satInput");
+        if (ImGui::SliderFloat("", &(color_.y), 0, 1.0f))
+        {
+          SetSaturation();
+        }
+        ImGui::PopID();
+
+        ImGui::Text("Brightness");
+        ImGui::PushID("brightnessInput");
+        if (ImGui::SliderFloat("", &(color_.z), 0, 1.0f))
+        {
+          SetBrightness();
+        }
+        ImGui::PopID();
+
+        ImGui::Text("Color Temperature");
+        ImGui::PushID("ctInput");
+        if (ImGui::SliderInt("", &colorTemperature_, 1200, 6500))
+        {
+          SetColorTemperature();
+        }
+        ImGui::PopID();
+
+        ImGui::EndTabItem();
+      }
+
+      if (ImGui::BeginTabItem("Effects"))
+      {
+        ImGui::Text("");
+
+        if (effects_.empty())
+        {
+          ImGui::Text("(No effects on controller)");
+        }
+        else {
+          for (auto it = effects_.begin(); it != effects_.end(); ++it)
           {
-            SetEffect(*it);
+            if (ImGui::Button((*it).c_str()))
+            {
+              SetEffect(*it);
+            }
           }
         }
+
+        ImGui::EndTabItem();
       }
 
-      ImGui::Text("");
-      ImGui::Separator();
-    }
-
-    ImGui::Text("");
-    if (ImGui::Button("Identify panels"))
-    {
-      IdentifyPanels();
+      ImGui::EndTabBar();
     }
 
     ImGui::End();
@@ -213,16 +246,19 @@ namespace Glow
 
   void State_Main::IdentifyPanels()
   {
-    Engine::Instance->HTTP().SetURL(host_ + "/api/v1/" + authToken_ + "/identify");
+    std::string url = host_ + "/api/v1/" + authToken_ + "/identify";
+    
+    Engine::Instance->HTTP().SetURL(url.c_str());
     Engine::Instance->HTTP().SetMethod("PUT");
     Engine::Instance->HTTP().SetRequestBody("");
     Engine::Instance->HTTP().SendRequest();
-    std::cout << Engine::Instance->HTTP().GetResponse() << std::endl;
   }
 
   void State_Main::GetAllPanelData()
   {
-    Engine::Instance->HTTP().SetURL(host_ + "/api/v1/" + authToken_);
+    std::string url = host_ + "/api/v1/" + authToken_;
+    
+    Engine::Instance->HTTP().SetURL(url.c_str());
     Engine::Instance->HTTP().SetMethod("GET");
     Engine::Instance->HTTP().SendRequest();
 
@@ -233,6 +269,41 @@ namespace Glow
     if (!lightConfig_.IsObject())
     {
       return;
+    }
+
+    if (lightConfig_.HasMember("state"))
+    {
+      const rj::Value& state = lightConfig_["state"];
+
+      if (state.HasMember("hue"))
+      {
+        const rj::Value& hue = state["hue"];
+
+        if (hue.HasMember("value") && hue["value"].IsNumber())
+        {
+          color_.x = hue["value"].GetFloat() / 360.0f;
+        }
+      }
+
+      if (state.HasMember("sat"))
+      {
+        const rj::Value& sat = state["sat"];
+
+        if (sat.HasMember("value") && sat["value"].IsNumber())
+        {
+          color_.y = sat["value"].GetFloat() / 100.0f;
+        }
+      }
+
+      if (state.HasMember("ct"))
+      {
+        const rj::Value& color_temperature = state["ct"];
+
+        if (color_temperature.HasMember("value") && color_temperature["value"].IsNumber())
+        {
+          colorTemperature_ = color_temperature["value"].GetInt();
+        }
+      }
     }
 
     if (lightConfig_.HasMember("effects"))
@@ -402,44 +473,147 @@ namespace Glow
 
   void State_Main::SetColor()
   {
-    Engine::Instance->HTTP().SetURL(host_ + "/api/v1/" + authToken_ + "/state");
+    std::string url = host_ + "/api/v1/" + authToken_ + "/state";
+
+    Engine::Instance->HTTP().SetURL(url.c_str());
     Engine::Instance->HTTP().SetMethod("PUT");
 
-    glm::vec3 hsv_color = glm::hsvColor(color_);
-
-    unsigned hue = static_cast<unsigned>(hsv_color.r);
-    unsigned saturation = static_cast<unsigned>(hsv_color.g * 100);
-    unsigned brightness = static_cast<unsigned>(hsv_color.b * 100);
+    unsigned hue = static_cast<unsigned>(color_.x * 360);
+    unsigned saturation = static_cast<unsigned>(color_.y * 100);
+    unsigned brightness = static_cast<unsigned>(color_.z * 100);
 
     std::string request_body;
 
     request_body = "{\"on\":{\"value\": true}, \"hue\":{\"value\":" + std::to_string(hue) + "}, \"sat\":{\"value\":" + std::to_string(saturation) + "}, \"brightness\":{\"value\":" + std::to_string(brightness) + "}}";
 
-    Engine::Instance->HTTP().SetRequestBody(request_body);
+    Engine::Instance->HTTP().SetRequestBody(request_body.c_str());
     Engine::Instance->HTTP().SendRequest();
+
+    GetAllPanelData();
+  }
+
+  void State_Main::SetHue()
+  {
+    std::string url = host_ + "/api/v1/" + authToken_ + "/state";
+
+    Engine::Instance->HTTP().SetURL(url.c_str());
+    Engine::Instance->HTTP().SetMethod("PUT");
+
+    unsigned hue = static_cast<unsigned>(color_.x * 360);
+
+    std::string request_body;
+
+    request_body = "{\"on\":{\"value\": true}, \"hue\":{\"value\":" + std::to_string(hue) + "}}";
+
+    Engine::Instance->HTTP().SetRequestBody(request_body.c_str());
+    Engine::Instance->HTTP().SendRequest();
+
+    GetAllPanelData();
+  }
+
+  void State_Main::SetSaturation()
+  {
+    std::string url = host_ + "/api/v1/" + authToken_ + "/state";
+
+    Engine::Instance->HTTP().SetURL(url.c_str());
+    Engine::Instance->HTTP().SetMethod("PUT");
+
+    unsigned saturation = static_cast<unsigned>(color_.y * 100);
+
+    std::string request_body;
+
+    request_body = "{\"on\":{\"value\": true}, \"sat\":{\"value\":" + std::to_string(saturation) + "}}";
+
+    Engine::Instance->HTTP().SetRequestBody(request_body.c_str());
+    Engine::Instance->HTTP().SendRequest();
+
+    GetAllPanelData();
+  }
+
+  void State_Main::SetBrightness()
+  {
+    std::string url = host_ + "/api/v1/" + authToken_ + "/state";
+
+    Engine::Instance->HTTP().SetURL(url.c_str());
+    Engine::Instance->HTTP().SetMethod("PUT");
+
+    unsigned brightness = static_cast<unsigned>(color_.z * 100);
+
+    std::string request_body;
+
+    request_body = "{\"on\":{\"value\": true}, \"brightness\":{\"value\":" + std::to_string(brightness) + "}}";
+
+    Engine::Instance->HTTP().SetRequestBody(request_body.c_str());
+    Engine::Instance->HTTP().SendRequest();
+
+    GetAllPanelData();
+  }
+
+  void State_Main::SetColorTemperature()
+  {
+    std::string url = host_ + "/api/v1/" + authToken_ + "/state";
+
+    Engine::Instance->HTTP().SetURL(url.c_str());
+    Engine::Instance->HTTP().SetMethod("PUT");
+
+    std::string request_body;
+
+    request_body = "{\"on\":{\"value\": true}, \"ct\":{\"value\":" + std::to_string(colorTemperature_) + "}}";
+
+    Engine::Instance->HTTP().SetRequestBody(request_body.c_str());
+    Engine::Instance->HTTP().SendRequest();
+
+    GetAllPanelData();
   }
 
   void State_Main::SetEffect(const std::string& effect)
   {
-    Engine::Instance->HTTP().SetURL(host_ + "/api/v1/" + authToken_ + "/effects");
+    std::string url = host_ + "/api/v1/" + authToken_ + "/effects";
+
+    Engine::Instance->HTTP().SetURL(url.c_str());
     Engine::Instance->HTTP().SetMethod("PUT");
-    Engine::Instance->HTTP().SetRequestBody("{\"select\":\"" + effect + "\"}");
+
+    std::string request_body;
+
+    request_body = "{\"select\":\"" + effect + "\"}";
+
+    Engine::Instance->HTTP().SetRequestBody(request_body.c_str());
     Engine::Instance->HTTP().SendRequest();
+
+    GetAllPanelData();
   }
 
   void State_Main::SetOnOff(bool on)
   {
-    Engine::Instance->HTTP().SetURL(host_ + "/api/v1/" + authToken_ + "/state");
+    std::string url = host_ + "/api/v1/" + authToken_ + "/state";
+
+    Engine::Instance->HTTP().SetURL(url.c_str());
     Engine::Instance->HTTP().SetMethod("PUT");
-    Engine::Instance->HTTP().SetRequestBody("{\"on\":{\"value\":" + std::string((on ? "true" : "false")) + "}}");
+    
+    std::string request_body;
+
+    request_body = "{\"on\":{\"value\":" + std::string(on ? "true" : "false") + "}}";
+    
+    Engine::Instance->HTTP().SetRequestBody(request_body.c_str());
     Engine::Instance->HTTP().SendRequest();
+
+    GetAllPanelData();
   }
 
   void State_Main::SetOrientation()
   {
-    Engine::Instance->HTTP().SetURL(host_ + "/api/v1/" + authToken_ + "/panelLayout");
+    std::string url = host_ + "/api/v1/" + authToken_ + "/panelLayout";
+
+    Engine::Instance->HTTP().SetURL(url.c_str());
     Engine::Instance->HTTP().SetMethod("PUT");
-    Engine::Instance->HTTP().SetRequestBody("{\"globalOrientation\":{\"value\":" + std::to_string(orientation_) + "}}");
+
+    std::string request_body;
+
+    request_body = "{\"globalOrientation\":{\"value\":" + std::to_string(orientation_) + "}}";
+
+    Engine::Instance->HTTP().SetRequestBody(request_body.c_str());
     Engine::Instance->HTTP().SendRequest();
+
+    GetAllPanelData();
   }
 }

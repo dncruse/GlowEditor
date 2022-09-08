@@ -67,6 +67,11 @@ namespace Barrage
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(frameEnd_ - frameStart_);
 
     dt_ = duration.count();
+
+    if (dt_ > 20)
+    {
+      dt_ = 20;
+    }
   }
 
   long long Engine::DT()

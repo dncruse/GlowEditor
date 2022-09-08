@@ -29,7 +29,7 @@ namespace Barrage
     handle_ = curl_easy_init();
 
     struct curl_slist* headers = nullptr;
-    headers = curl_slist_append(headers, "Content-Type: text/plain");
+    headers = curl_slist_append(headers, "Content-Type: application/json");
     curl_easy_setopt(handle_, CURLOPT_HTTPHEADER, headers);
 
     curl_easy_setopt(handle_, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -43,20 +43,19 @@ namespace Barrage
     curl_global_cleanup();
   }
 
-  void HTTPManager::SetURL(const std::string& url)
+  void HTTPManager::SetURL(const char* url)
   {
-    curl_easy_setopt(handle_, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(handle_, CURLOPT_URL, url);
   }
 
-  void HTTPManager::SetRequestBody(const std::string& body)
+  void HTTPManager::SetRequestBody(const char* body)
   {
-    curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, body.c_str());
-    //curl_easy_setopt(handle_, CURLOPT_POSTFIELDSIZE, body.length() + 1);
+    curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, body);
   }
 
-  void HTTPManager::SetMethod(const std::string& method)
+  void HTTPManager::SetMethod(const char* method)
   {
-    curl_easy_setopt(handle_, CURLOPT_CUSTOMREQUEST, method.c_str());
+    curl_easy_setopt(handle_, CURLOPT_CUSTOMREQUEST, method);
   }
 
   void HTTPManager::SendRequest()
@@ -68,6 +67,15 @@ namespace Barrage
   const std::string& HTTPManager::GetResponse()
   {
     return response_;
+  }
+
+  long HTTPManager::GetResponseCode()
+  {
+    long code;
+    
+    curl_easy_getinfo(handle_, CURLINFO_RESPONSE_CODE, &code);
+
+    return code;
   }
 
   size_t HTTPManager::WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response)

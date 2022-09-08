@@ -58,7 +58,7 @@ namespace Barrage
           The url to send requests to.
       */
       /**************************************************************/
-      void SetURL(const std::string& url);
+      void SetURL(const char* url);
 
       /**************************************************************/
       /*!
@@ -69,7 +69,7 @@ namespace Barrage
           The string version of the JSON request body to send.
       */
       /**************************************************************/
-      void SetRequestBody(const std::string& body);
+      void SetRequestBody(const char* body);
 
       /**************************************************************/
       /*!
@@ -80,7 +80,7 @@ namespace Barrage
           The method to use. Should be all caps.
       */
       /**************************************************************/
-      void SetMethod(const std::string& method);
+      void SetMethod(const char* method);
 
       /**************************************************************/
       /*!
@@ -100,6 +100,17 @@ namespace Barrage
       */
       /**************************************************************/
       const std::string& GetResponse();
+
+      /**************************************************************/
+      /*!
+        \brief
+          Gets the response code from the last HTTP request.
+
+        \return
+          Returns the response code.
+      */
+      /**************************************************************/
+      long GetResponseCode();
 
     private:
       static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response);
